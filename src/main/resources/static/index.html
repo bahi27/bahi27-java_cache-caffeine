@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo Caffeine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+Pro:wght@400;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Serif Pro', Georgia, serif;
+            font-size: 15px;
+            line-height: 1.6;
+            padding: 40px;
+            background-color: #fafafa;
+            color: #333;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 35px;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .button-container {
+            margin-bottom: 30px;
+        }
+
+        button {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            padding: 12px 28px;
+            background-color: #333;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 30px;
+            flex-wrap: nowrap;
+        }
+
+        .result {
+            border: 1px solid #ddd;
+            padding: 25px;
+            width: 350px;
+            background-color: white;
+            flex-shrink: 0;
+            min-height: 200px;
+        }
+
+        .result h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+            letter-spacing: -0.3px;
+        }
+
+        .result p {
+            margin: 12px 0;
+            color: #444;
+        }
+
+        .result strong {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .text {
+            word-break: break-word;
+            white-space: pre-wrap;
+            font-family: 'Source Serif Pro', Georgia, serif;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .loading {
+            color: #999;
+            font-style: italic;
+        }
+
+        @media (max-width: 800px) {
+            .container {
+                flex-wrap: wrap;
+            }
+
+            .result {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Demo Caffeine</h1>
+
+    <div class="button-container">
+        <button id="run-button" onclick="runDemo()">Lancer les requêtes</button>
+    </div>
+
+    <div class="container">
+        <div class="result" id="first-result">
+            <h2>Première requête</h2>
+            <p>En attente...</p>
+        </div>
+
+        <div class="result" id="second-result">
+            <h2>Deuxième requête</h2>
+            <p>En attente...</p>
+        </div>
+    </div>
+
+    <script>
+        async function getText() {
+            const response = await fetch("/text");
+            return await response.json();
+        }
+
+        async function runDemo() {
+            const button = document.getElementById("run-button");
+            button.disabled = true;
+            button.textContent = "Chargement...";
+
+            try {
+                // Première requête
+                document.getElementById("first-result").innerHTML = `
+                    <h2>Première requête</h2>
+                    <p class="loading">Chargement...</p>
+                `;
+
+                const first = await getText();
+                document.getElementById("first-result").innerHTML = `
+                    <h2>Première requête</h2>
+                    <p>
+                        <strong>Temps :</strong>
+                        ${first.timeNs} ns
+                    </p>
+                    <p>
+                        <strong>Texte :</strong>
+                    </p>
+                    <p class="text">
+                        ${first.text}
+                    </p>
+                `;
+
+                // Deuxième requête
+                document.getElementById("second-result").innerHTML = `
+                    <h2>Deuxième requête</h2>
+                    <p class="loading">Chargement...</p>
+                `;
+
+                const second = await getText();
+                document.getElementById("second-result").innerHTML = `
+                    <h2>Deuxième requête</h2>
+                    <p>
+                        <strong>Temps :</strong>
+                        ${second.timeNs} ns
+                    </p>
+                    <p>
+                        <strong>Texte :</strong>
+                    </p>
+                    <p class="text">
+                        ${second.text}
+                    </p>
+                `;
+
+                button.disabled = false;
+                button.textContent = "Lancer les requêtes";
+            } catch (error) {
+                console.error("Erreur:", error);
+                document.getElementById("first-result").innerHTML = `
+                    <h2>Première requête</h2>
+                    <p style="color: red;">Erreur: ${error.message}</p>
+                `;
+                button.disabled = false;
+                button.textContent = "Lancer les requêtes";
+            }
+        }
+    </script>
+</body>
+</html>
